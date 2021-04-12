@@ -1,0 +1,32 @@
+#!/usr/bin/bash
+
+# SSH
+declare -r ssh_host=''
+declare -r ssh_port=''
+declare -r ssh_user=''
+
+# Devices
+declare -r device_input='/dev/video0'
+declare -r device_output='/dev/video0'
+
+# Video
+declare -r video_resolution='1280x720'
+declare -r video_codec='copy'
+declare -r video_bitrate='500k'
+declare -r video_format='matroska'
+
+# modprobe v4l2loopback card_label='Remote virtual webcam'
+ssh -p "$ssh_port" "$ssh_user@$ssh_host" \
+  ffmpeg \
+    -re \
+    -i "$device_input" \
+    -s "$video_resolution" \
+    -c "$video_codec" \
+    -b:v "$video_bitrate" \
+    -f "$video_format" \
+    pipe:1 | \
+  ffmpeg \
+    -i - \
+    -f v4l2 \
+    "$device_output"
+
